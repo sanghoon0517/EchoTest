@@ -41,12 +41,12 @@ public class EchoServer {
 			b.group(group)
 			.channel(NioServerSocketChannel.class) //NIO 전송채널을 이용하도록 지정
 			.localAddress(new InetSocketAddress(port)) // 지정된 포트로 소켓 주소 설정
-			.childHandler(new ChannelInitializer<SocketChannel>() {
+			.childHandler(new ChannelInitializer<SocketChannel>() { // EchoServerHandler 하나를 채널의 ChannelPipeline으로 추가
 				protected void initChannel(SocketChannel ch) throws Exception { //EchoServerHandler
-					ch.pipeline().addLast(serverHandler);
+					ch.pipeline().addLast(serverHandler); //EchoServerHandler는 @Sharable이므로 동일한 항목을 이용할 수 있다.
 				};
 			});
-			ChannelFuture f = b.bind().sync(); //서버를 비동기식으로 바인딩하겠다
+			ChannelFuture f = b.bind().sync(); //서버를 비동기식으로 바인딩하겠다. sync()는 바인딩이 완료되기를 대기하겠다는 의미이다.
 			f.channel().closeFuture().sync(); // 채널의 closeFutre를 얻고 완료될 때까지 현재 스레드를 블로킹
 		} finally {
 			group.shutdownGracefully().sync(); //EventGroup을 종료하고 모든 리소스 해제

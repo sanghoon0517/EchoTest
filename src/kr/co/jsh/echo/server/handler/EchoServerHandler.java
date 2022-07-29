@@ -1,5 +1,7 @@
 package kr.co.jsh.echo.server.handler;
 
+import java.io.ByteArrayOutputStream;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -9,32 +11,47 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.CharsetUtil;
 
 /**
- * @author ì „ìƒí›ˆ
+ * @author Àü»óÈÆ
  * 
- * Echoì„œë²„ëŠ” ë“¤ì–´ì˜¤ëŠ” ë©”ì‹œì§€ì— ë°˜ì‘í•´ì•¼ í•˜ë¯€ë¡œ ì¸ë°”ìš´ë“œ ì´ë²¤íŠ¸ì— ë°˜ì‘í•˜ëŠ” ë©”ì„œë“œê°€ ì •ì˜ëœ ChannelInboundHandlerì¸í„°í˜ì´ìŠ¤ë¥¼ êµ¬í˜„í•´ì•¼ í•œë‹¤.
- * EchoServerHandlerëŠ” ë¹„ì¦ˆë‹ˆìŠ¤ ë¡œì§ì„ êµ¬í˜„í•œë‹¤.
+ * Echo¼­¹ö´Â µé¾î¿À´Â ¸Ş½ÃÁö¿¡ ¹İÀÀÇØ¾ß ÇÏ¹Ç·Î ÀÎ¹Ù¿îµå ÀÌº¥Æ®¿¡ ¹İÀÀÇÏ´Â ¸Ş¼­µå°¡ Á¤ÀÇµÈ ChannelInboundHandlerÀÎÅÍÆäÀÌ½º¸¦ ±¸ÇöÇØ¾ß ÇÑ´Ù.
+ * EchoServerHandler´Â ºñÁî´Ï½º ·ÎÁ÷À» ±¸ÇöÇÑ´Ù.
  *
  */
-@Sharable //ChannelHandlerë¥¼ ì—¬ëŸ¬ ì±„ë„ ê°„ì— ì•ˆì „í•˜ê²Œ ê³µìœ í•  ìˆ˜ ìˆìŒì„ ë‚˜íƒ€ë‚¸ë‹¤.
+
+//@Sharable ¾î³ëÅ×ÀÌ¼ÇÀº Race Condition ¾øÀÌ, ÇÏ³ª ¶Ç´Â ´Ù¼öÀÇ ÆÄÀÌÇÁ¶óÀÎ¿¡ ¿©·¯¹ø Ãß°¡ÇÒ ¼ö ÀÖ´Ù
+@Sharable //ChannelHandler¸¦ ¿©·¯ Ã¤³Î °£¿¡ ¾ÈÀüÇÏ°Ô °øÀ¯ÇÒ ¼ö ÀÖÀ½À» ³ªÅ¸³½´Ù.
 public class EchoServerHandler extends ChannelInboundHandlerAdapter{
-	@Override //ë©”ì‹œì§€ê°€ ë“¤ì–´ì˜¬ ë•Œë§ˆë‹¤ í˜¸ì¶œëœë‹¤.
+	@Override //¸Ş½ÃÁö°¡ µé¾î¿Ã ¶§¸¶´Ù È£ÃâµÈ´Ù.
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		ByteBuf in = (ByteBuf)msg;
 		System.out.println("Server received : "+in.toString(CharsetUtil.UTF_8));
-		ctx.write(in); //í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° ë°›ì€ ë©”ì‹œì§€ë¥¼ ë‹¤ì‹œ Echoì‹œí‚¨ë‹¤.
-		//ì•„ì›ƒë°”ìš´ë“œ ë©”ì‹œì§€ë¥¼ í”ŒëŸ¬ì‹œí•˜ì§€ ì•Šì€ ì±„ë¡œ ë°›ì€ ë©”ì‹œì§€ë¥¼ ë°œì‹ ìë¡œ ì¶œë ¥í•œë‹¤.
+		ctx.write(in); //Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ ¹ŞÀº ¸Ş½ÃÁö¸¦ ´Ù½Ã Echo½ÃÅ²´Ù.
+		//¾Æ¿ô¹Ù¿îµå ¸Ş½ÃÁö¸¦ ÇÃ·¯½ÃÇÏÁö ¾ÊÀº Ã¤·Î ¹ŞÀº ¸Ş½ÃÁö¸¦ ¹ß½ÅÀÚ·Î Ãâ·ÂÇÑ´Ù.
+		
+		String ENCODING = "UTF-8";
+		String response = "FIXED TEST RESPONSE DATA¸¦ Àü¼ÛÇÕ´Ï´Ù.";
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		baos.write(response.getBytes(ENCODING));
+		
+		byte[] byteArr = baos.toByteArray();
+		
+		ByteBuf out = Unpooled.directBuffer();
+		out.writeBytes(byteArr);
+		
+		ctx.writeAndFlush(out); //Ã¤³Î È°¼ºÈ­ ½Ã ÀÀ´ä ¸Ş½ÃÁö Àü¼Û
 	}
 	
-	@Override //channelRead()ì˜ ë§ˆì§€ë§‰ í˜¸ì¶œì—ì„œ í˜„ì¬ ì¼ê´„ ì²˜ë¦¬ì˜ ë§ˆì§€ë§‰ ë©”ì‹œì§€ë¥¼ ì²˜ë¦¬í–ˆìŒì„ í•¸ë“¤ëŸ¬ì— í†µë³´í•œë‹¤.
+	@Override //channelRead()ÀÇ ¸¶Áö¸· È£Ãâ¿¡¼­ ÇöÀç ÀÏ°ı Ã³¸®ÀÇ ¸¶Áö¸· ¸Ş½ÃÁö¸¦ Ã³¸®ÇßÀ½À» ÇÚµé·¯¿¡ Åëº¸ÇÑ´Ù.
 	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
 		System.out.println("Bye");
-		ctx.writeAndFlush(Unpooled.EMPTY_BUFFER) //ëŒ€ê¸°ì¤‘ì¸ ë©”ì‹œì§€ë¥¼ í”ŒëŸ¬ì‹œí•˜ê³  ì±„ë„ì„ ë‹«ìŒ
+		ctx.writeAndFlush(Unpooled.EMPTY_BUFFER) //´ë±âÁßÀÎ ¸Ş½ÃÁö¸¦ ÇÃ·¯½ÃÇÏ°í Ã¤³ÎÀ» ´İÀ½
 			.addListener(ChannelFutureListener.CLOSE);
 	}
 	
-	@Override //ì½ê¸° ì‘ì—… ì¤‘ ì˜ˆì™¸ê°€ ë°œìƒí•˜ë©´ í˜¸ì¶œëœë‹¤.
+	@Override //ÀĞ±â ÀÛ¾÷ Áß ¿¹¿Ü°¡ ¹ß»ıÇÏ¸é È£ÃâµÈ´Ù.
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		cause.printStackTrace();
-		ctx.close(); //ì˜ˆì™¸ê°€ ë°œìƒí–ˆì„ ì‹œ, ì˜ˆì™¸ë¥¼ ì¡ê³  ì±„ë„ contextë¥¼ ë‹«ì•„ë²„ë¦¼
+		ctx.close(); //¿¹¿Ü°¡ ¹ß»ıÇßÀ» ½Ã, ¿¹¿Ü¸¦ Àâ°í Ã¤³Î context¸¦ ´İ¾Æ¹ö¸²
 	}
 }

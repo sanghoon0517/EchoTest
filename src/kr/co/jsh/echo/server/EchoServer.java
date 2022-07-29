@@ -12,16 +12,16 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import kr.co.jsh.echo.server.handler.EchoServerHandler;
 
 /**
- * @author ì „ìƒí›ˆ
+ * @author Àü»óÈÆ
  * 
- * mainë©”ì„œë“œë¥¼ í†µí•´ ì„œë²„ë¥¼ ë¶€íŠ¸ìŠ¤íŠ¸ë©í•œë‹¤.
+ * main¸Ş¼­µå¸¦ ÅëÇØ ¼­¹ö¸¦ ºÎÆ®½ºÆ®·¦ÇÑ´Ù.
  * 
- * ë¶€íŠ¸ìŠ¤íŠ¸ë© step
- * 1. ì„œë²„ë¥¼ ë¶€íŠ¸ìŠ¤íŠ¸ë©í•˜ê³  ë°”ì¸ë”©í•˜ëŠ” ë° ì´ìš©í•  ServerBootstrap ì¸ìŠ¤í„´ìŠ¤ë¥¼ ìƒì„±í•œë‹¤.
- * 2. ìƒˆë¡œìš´ ì—°ê²° ìˆ˜ë½ ë° ë°ì´í„° ì½ê¸°/ì“°ê¸°ì™€ ê°™ì€ ì´ë²¤íŠ¸ ì²˜ë¦¬ë¥¼ ìˆ˜í–‰í•  NioEventLoopGroup ì¸ìŠ¤í„´ìŠ¤ë¥¼ ìƒì„±í•˜ê³  í• ë‹¹í•œë‹¤.
- * 3. ì„œë²„ê°€ ë°”ì¸ë”©í•˜ëŠ” ë¡œì»¬ InetSocketAddressë¥¼ ì§€ì •í•œë‹¤.
- * 4. EchoServerHandler ì¸ìŠ¤í„´ìŠ¤ë¥¼ ì´ìš©í•´ ìƒˆë¡œìš´ ê° Channelì„ ì´ˆê¸°í™”í•œë‹¤.
- * 5. ServerBootstrap.bind()ë¥¼ í˜¸ì¶œí•´ ì„œë²„ë¥¼ ë°”ì¸ë”©í•œë‹¤.
+ * ºÎÆ®½ºÆ®·¦ step
+ * 1. ¼­¹ö¸¦ ºÎÆ®½ºÆ®·¦ÇÏ°í ¹ÙÀÎµùÇÏ´Â µ¥ ÀÌ¿ëÇÒ ServerBootstrap ÀÎ½ºÅÏ½º¸¦ »ı¼ºÇÑ´Ù.
+ * 2. »õ·Î¿î ¿¬°á ¼ö¶ô ¹× µ¥ÀÌÅÍ ÀĞ±â/¾²±â¿Í °°Àº ÀÌº¥Æ® Ã³¸®¸¦ ¼öÇàÇÒ NioEventLoopGroup ÀÎ½ºÅÏ½º¸¦ »ı¼ºÇÏ°í ÇÒ´çÇÑ´Ù.
+ * 3. ¼­¹ö°¡ ¹ÙÀÎµùÇÏ´Â ·ÎÄÃ InetSocketAddress¸¦ ÁöÁ¤ÇÑ´Ù.
+ * 4. EchoServerHandler ÀÎ½ºÅÏ½º¸¦ ÀÌ¿ëÇØ »õ·Î¿î °¢ ChannelÀ» ÃÊ±âÈ­ÇÑ´Ù.
+ * 5. ServerBootstrap.bind()¸¦ È£ÃâÇØ ¼­¹ö¸¦ ¹ÙÀÎµùÇÑ´Ù.
  *
  */
 public class EchoServer {
@@ -35,21 +35,21 @@ public class EchoServer {
 	
 	private void start() throws Exception {
 		final EchoServerHandler serverHandler = new EchoServerHandler();
-		EventLoopGroup group = new NioEventLoopGroup(); // EventLoogGroup ìƒì„±
-		ServerBootstrap b = new ServerBootstrap(); // ServerBootstrap ìƒì„±
+		EventLoopGroup group = new NioEventLoopGroup(); // EventLoogGroup »ı¼º
+		ServerBootstrap b = new ServerBootstrap(); // ServerBootstrap »ı¼º
 		try {
 			b.group(group)
-			.channel(NioServerSocketChannel.class) //NIO ì „ì†¡ì±„ë„ì„ ì´ìš©í•˜ë„ë¡ ì§€ì •
-			.localAddress(new InetSocketAddress(port)) // ì§€ì •ëœ í¬íŠ¸ë¡œ ì†Œì¼“ ì£¼ì†Œ ì„¤ì •
-			.childHandler(new ChannelInitializer<SocketChannel>() { // EchoServerHandler í•˜ë‚˜ë¥¼ ì±„ë„ì˜ ChannelPipelineìœ¼ë¡œ ì¶”ê°€
+			.channel(NioServerSocketChannel.class) //NIO Àü¼ÛÃ¤³ÎÀ» ÀÌ¿ëÇÏµµ·Ï ÁöÁ¤
+			.localAddress(new InetSocketAddress(port)) // ÁöÁ¤µÈ Æ÷Æ®·Î ¼ÒÄÏ ÁÖ¼Ò ¼³Á¤
+			.childHandler(new ChannelInitializer<SocketChannel>() { // EchoServerHandler ÇÏ³ª¸¦ Ã¤³ÎÀÇ ChannelPipelineÀ¸·Î Ãß°¡
 				protected void initChannel(SocketChannel ch) throws Exception { //EchoServerHandler
-					ch.pipeline().addLast(serverHandler); //EchoServerHandlerëŠ” @Sharableì´ë¯€ë¡œ ë™ì¼í•œ í•­ëª©ì„ ì´ìš©í•  ìˆ˜ ìˆë‹¤.
+					ch.pipeline().addLast(serverHandler); //EchoServerHandler´Â @SharableÀÌ¹Ç·Î µ¿ÀÏÇÑ Ç×¸ñÀ» ÀÌ¿ëÇÒ ¼ö ÀÖ´Ù.
 				};
 			});
-			ChannelFuture f = b.bind().sync(); //ì„œë²„ë¥¼ ë¹„ë™ê¸°ì‹ìœ¼ë¡œ ë°”ì¸ë”©í•˜ê² ë‹¤. sync()ëŠ” ë°”ì¸ë”©ì´ ì™„ë£Œë˜ê¸°ë¥¼ ëŒ€ê¸°í•˜ê² ë‹¤ëŠ” ì˜ë¯¸ì´ë‹¤.
-			f.channel().closeFuture().sync(); // ì±„ë„ì˜ closeFutreë¥¼ ì–»ê³  ì™„ë£Œë  ë•Œê¹Œì§€ í˜„ì¬ ìŠ¤ë ˆë“œë¥¼ ë¸”ë¡œí‚¹
+			ChannelFuture f = b.bind().sync(); //¼­¹ö¸¦ ºñµ¿±â½ÄÀ¸·Î ¹ÙÀÎµùÇÏ°Ú´Ù. sync()´Â ¹ÙÀÎµùÀÌ ¿Ï·áµÇ±â¸¦ ´ë±âÇÏ°Ú´Ù´Â ÀÇ¹ÌÀÌ´Ù.
+			f.channel().closeFuture().sync(); // Ã¤³ÎÀÇ closeFutre¸¦ ¾ò°í ¿Ï·áµÉ ¶§±îÁö ÇöÀç ½º·¹µå¸¦ ºí·ÎÅ·
 		} finally {
-			group.shutdownGracefully().sync(); //EventGroupì„ ì¢…ë£Œí•˜ê³  ëª¨ë“  ë¦¬ì†ŒìŠ¤ í•´ì œ
+			group.shutdownGracefully().sync(); //EventGroupÀ» Á¾·áÇÏ°í ¸ğµç ¸®¼Ò½º ÇØÁ¦
 		} 
 	}
 }

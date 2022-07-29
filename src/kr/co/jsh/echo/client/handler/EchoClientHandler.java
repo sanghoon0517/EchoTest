@@ -1,5 +1,9 @@
 package kr.co.jsh.echo.client.handler;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -7,29 +11,42 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.CharsetUtil;
 
 /**
- * @author ì „ìƒí›ˆ
+ * @author Àü»óÈÆ
  * 
- * Echoí´ë¼ì´ì–¸íŠ¸ step
+ * EchoÅ¬¶óÀÌ¾ğÆ® step
  * 
- * 1.ì„œë²„ë¡œ ì—°ê²°í•œë‹¤.
- * 2. ë©”ì‹œì§€ë¥¼ í•˜ë‚˜ ì´ìƒ ì „ì†¡í•œë‹¤.
- * 3. ë©”ì‹œì§€ë§ˆë‹¤ ëŒ€ê¸°í•˜ê³  ì„œë²„ë¡œë¶€í„° ë™ì¼í•œ ë©”ì‹œì§€ë¥¼ ìˆ˜ì‹ í•œë‹¤.
- * 4. ì—°ê²°ì„ ë‹«ëŠ”ë‹¤.
+ * 1.¼­¹ö·Î ¿¬°áÇÑ´Ù.
+ * 2. ¸Ş½ÃÁö¸¦ ÇÏ³ª ÀÌ»ó Àü¼ÛÇÑ´Ù.
+ * 3. ¸Ş½ÃÁö¸¶´Ù ´ë±âÇÏ°í ¼­¹ö·ÎºÎÅÍ µ¿ÀÏÇÑ ¸Ş½ÃÁö¸¦ ¼ö½ÅÇÑ´Ù.
+ * 4. ¿¬°áÀ» ´İ´Â´Ù.
  *
  */
 public class EchoClientHandler extends SimpleChannelInboundHandler<ByteBuf>{
 	
-	@Override //ì„œë²„ì— ëŒ€í•œ ì—°ê²°ì´ ë§Œë“¤ì–´ì§€ë©´ í˜¸ì¶œëœë‹¤.
+	@Override //¼­¹ö¿¡ ´ëÇÑ ¿¬°áÀÌ ¸¸µé¾îÁö¸é È£ÃâµÈ´Ù.
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
-		ctx.writeAndFlush(Unpooled.copiedBuffer("Netty Connect()", CharsetUtil.UTF_8)); //ì±„ë„ í™œì„±í™” ì‹œ ë©”ì‹œì§€ ì „ì†¡
+		
+		String ENCODING = "UTF-8";
+		String content = "FIXED TEST DATA¸¦ Àü¼ÛÇÕ´Ï´Ù.";
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		baos.write(content.getBytes(ENCODING));
+		
+		byte[] bs = baos.toByteArray();
+		
+		ByteBuf buf = Unpooled.directBuffer();
+		buf.writeBytes(bs);
+
+		
+		ctx.writeAndFlush(Unpooled.copiedBuffer("Netty Connect()\n", CharsetUtil.UTF_8)); //Ã¤³Î È°¼ºÈ­ ½Ã ¸Ş½ÃÁö Àü¼Û
+		ctx.writeAndFlush(buf); //Ã¤³Î È°¼ºÈ­ ½Ã ¸Ş½ÃÁö Àü¼Û
 	}
 	
-	@Override //ì„œë²„ë¡œë¶€í„° ë©”ì‹œì§€ë¥¼ ìˆ˜ì‹ í•˜ë©´ í˜¸ì¶œëœë‹¤.
+	@Override //¼­¹ö·ÎºÎÅÍ ¸Ş½ÃÁö¸¦ ¼ö½ÅÇÏ¸é È£ÃâµÈ´Ù.
 	protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
-		System.out.println("Client receive : "+msg.toString(CharsetUtil.UTF_8)); //ìˆ˜ì‹ í•œ ë©”ì‹œì§€ ë¡œê¹…
+		System.out.println("Client receive : "+msg.toString(CharsetUtil.UTF_8)); //¼ö½ÅÇÑ ¸Ş½ÃÁö ·Î±ë
 	}
 	
-	@Override //ì²˜ë¦¬ ì¤‘ì— ì˜ˆì™¸ê°€ ë°œìƒí•˜ë©´ í˜¸ì¶œëœë‹¤.
+	@Override //Ã³¸® Áß¿¡ ¿¹¿Ü°¡ ¹ß»ıÇÏ¸é È£ÃâµÈ´Ù.
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		cause.printStackTrace();
 		ctx.close();
